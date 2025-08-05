@@ -16,7 +16,6 @@ def load_database():
 
 def save_database(df):
     df.to_csv(DB_FILE, index=False)
-
 def admin_login():
     st.subheader("Login Admin")
     username = st.text_input("Username")
