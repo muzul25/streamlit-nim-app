@@ -4,7 +4,6 @@ import hashlib
 import os
 
 DB_FILE = "database.csv"
-LOGO_PATH = "logo.png"
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD_HASH = hashlib.sha256("admin123".encode()).hexdigest()
 
@@ -16,6 +15,7 @@ def load_database():
 
 def save_database(df):
     df.to_csv(DB_FILE, index=False)
+
 def admin_login():
     st.subheader("Login Admin")
     username = st.text_input("Username")
@@ -42,13 +42,11 @@ def admin_dashboard():
     st.dataframe(load_database())
 
 def peserta_dashboard():
-    if os.path.exists(LOGO_PATH):
-        st.image(LOGO_PATH, width=300)
     st.subheader("Cek Informasi Peserta")
     email = st.text_input("Masukkan Email Anda")
     if st.button("Lihat Informasi") and email:
         df = load_database()
-        result = df[df["email"] == email]
+        result = df[df["email"].str.strip().str.lower() == email.strip().lower()]
         if not result.empty:
             row = result.iloc[0]
             st.success("Data ditemukan:")
@@ -56,9 +54,8 @@ def peserta_dashboard():
             st.text(f"Username : {row['Username']}")
             st.text(f"Password : {row['Password']}")
         else:
-            st.error("email tidak ditemukan dalam database.")
+            st.error("Email tidak ditemukan dalam database.")
 
-st.set_page_config(page_title="Dashboard Peserta", page_icon=":bar_chart:", layout="centered")
 st.title("Aplikasi Informasi Akun Peserta")
 
 menu = st.sidebar.radio("Pilih Halaman", ["Peserta", "Admin"])
