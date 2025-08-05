@@ -9,7 +9,13 @@ ADMIN_PASSWORD_HASH = hashlib.sha256("admin123".encode()).hexdigest()
 
 def load_database():
     if os.path.exists(DB_FILE):
-        return pd.read_csv(DB_FILE, dtype=str)
+        try:
+            return pd.read_csv(DB_FILE, dtype=str, encoding="utf-8")
+        except (UnicodeDecodeError, pd.errors.ParserError):
+            try:
+                return pd.read_csv(DB_FILE, dtype=str, encoding="utf-8-sig")
+            except Exception:
+                return pd.read_csv(DB_FILE, dtype=str, encoding="latin1")
     else:
         return pd.DataFrame(columns=["email", "Nama", "Username", "Password"])
 
