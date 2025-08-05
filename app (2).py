@@ -9,15 +9,9 @@ ADMIN_PASSWORD_HASH = hashlib.sha256("admin123".encode()).hexdigest()
 
 def load_database():
     if os.path.exists(DB_FILE):
-        try:
-            return pd.read_csv(DB_FILE, dtype=str, encoding="utf-8")
-        except (UnicodeDecodeError, pd.errors.ParserError):
-            try:
-                return pd.read_csv(DB_FILE, dtype=str, encoding="utf-8-sig")
-            except Exception:
-                return pd.read_csv(DB_FILE, dtype=str, encoding="latin1")
+        return pd.read_csv(DB_FILE, dtype=str)
     else:
-        return pd.DataFrame(columns=["email", "Nama", "Username", "Password"])
+        return pd.DataFrame(columns=["NIM", "Nama", "Username", "Password"])
 
 def save_database(df):
     df.to_csv(DB_FILE, index=False)
@@ -38,21 +32,21 @@ def admin_dashboard():
     uploaded_file = st.file_uploader("Upload file CSV", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file, dtype=str)
-        if set(["email", "Nama", "Username", "Password"]).issubset(df.columns):
+        if set(["NIM", "Nama", "Username", "Password"]).issubset(df.columns):
             save_database(df)
             st.success("Database berhasil diupdate dan disimpan.")
         else:
-            st.error("Kolom harus mencakup: email, Nama, Username, Password")
+            st.error("Kolom harus mencakup: NIM, Nama, Username, Password")
 
     st.subheader("Database Saat Ini")
     st.dataframe(load_database())
 
 def peserta_dashboard():
     st.subheader("Cek Informasi Peserta")
-    email = st.text_input("Masukkan Email Anda")
-    if st.button("Lihat Informasi") and email:
+    nim = st.text_input("Masukkan NIM Anda")
+    if st.button("Lihat Informasi") and nim:
         df = load_database()
-        result = df[df["email"].str.strip().str.lower() == email.strip().lower()]
+        result = df[df["NIM"] == nim]
         if not result.empty:
             row = result.iloc[0]
             st.success("Data ditemukan:")
@@ -60,7 +54,7 @@ def peserta_dashboard():
             st.text(f"Username : {row['Username']}")
             st.text(f"Password : {row['Password']}")
         else:
-            st.error("Email tidak ditemukan dalam database.")
+            st.error("NIM tidak ditemukan dalam database.")
 
 st.title("Aplikasi Informasi Akun Peserta")
 
